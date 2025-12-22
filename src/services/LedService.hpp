@@ -1,10 +1,3 @@
-//
-// Created by a058446 on 19/12/2025.
-//
-
-#ifndef MAIN_LEDSERVICE_HPP
-#define MAIN_LEDSERVICE_HPP
-
 #pragma once
 #include "src/hardware/LedStrip.hpp"
 
@@ -12,14 +5,17 @@ class LedService {
 public:
     void init();
     void setColor(uint8_t r, uint8_t g, uint8_t b);
-    void setColor(uint8_t red, uint8_t green, uint8_t blue, uint8_t brightness);
+    bool setColor(uint8_t row, uint8_t r, uint8_t g, uint8_t b);
+    void getColor(uint8_t &r, uint8_t &g, uint8_t &b);
+    void getColor(uint16_t pin, uint8_t &r, uint8_t &g, uint8_t &b);
     void setBrightness(uint8_t brightness);
     uint8_t getBrightness();
 
+    void show();
+    void clear();
+
 private:
-    // Add Strip here
+    // Add Strip here FOR NOW.
+    //TODO: Get LedStrip data/value from Preferences (Add new/delete with rest request).
     LedStrip strip{4, 10, 5}; // pin, nb leds, nb cln
 };
-
-
-#endif //MAIN_LEDSERVICE_HPP
