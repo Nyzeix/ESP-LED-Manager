@@ -12,12 +12,14 @@ LedStrip::LedStrip(int pin, int pixels)
     setPixelsPerRow(pixels);
 }
 
+
 LedStrip::LedStrip(int pin, int pixelsPerRow, int rows)
     : strip(pixelsPerRow*rows, pin, NEO_GRB + NEO_KHZ800) {
     setPixels(pixelsPerRow*rows);
     setRows(rows);
     setPixelsPerRow(pixelsPerRow);
 }
+
 
 bool LedStrip::begin() {
     if (!strip.begin()) {
@@ -28,11 +30,13 @@ bool LedStrip::begin() {
     return true;
 }
 
+
 void LedStrip::setColor(uint8_t r, uint8_t g, uint8_t b) {
     for (uint16_t i = 0; i < strip.numPixels(); i++) {
         strip.setPixelColor(i, strip.Color(r, g, b));
     }
 }
+
 
 void LedStrip::getColor(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b) {
     uint32_t color = strip.getPixelColor(pixel);
@@ -40,20 +44,45 @@ void LedStrip::getColor(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b) {
 
 }
 
+
+void LedStrip::setRowColor(uint8_t row, uint8_t r, uint8_t g, uint8_t b) {
+    // For row number x, update led from row x-1 to row x.
+    uint16_t endingPixel = row * this->getPixelsPerRow();
+    for (uint16_t i = endingPixel - this->getPixelsPerRow(); i < endingPixel; i++) {
+        strip.setPixelColor(i, strip.Color(r, g, b));
+    }
+}
+
+
+void LedStrip::getRowColor(uint8_t row, uint8_t r, uint8_t g, uint8_t b) {
+    //TODO
+}
+
+
+uint32_t LedStrip::getPixelColor(uint16_t pixel) {
+    return strip.getPixelColor(pixel);
+}
+
+
 void LedStrip::setBrightness(uint8_t brightness) {
     strip.setBrightness(brightness);
 }
+
 
 uint8_t LedStrip::getBrightness() {
     return strip.getBrightness();
 }
 
+
 void LedStrip::clear() {
     strip.clear();
 }
+
+
 void LedStrip::show() {
     strip.show();
 }
+
 
 /**
  *
