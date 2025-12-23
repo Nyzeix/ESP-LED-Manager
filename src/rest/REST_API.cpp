@@ -60,6 +60,14 @@ void REST_API::begin() {
         this->setColors(request);
     });
 
+    server.on("/Brightness", HTTP_GET, [this](AsyncWebServerRequest* request) {
+        this->getBrightness(request);
+    });
+
+    server.on("/Brightness", HTTP_POST, [this](AsyncWebServerRequest* request) {
+        this->setBrightness(request);
+    });
+
     server.on("/Time", HTTP_GET, [this](AsyncWebServerRequest* request) {
         this->getTime(request);
     });
@@ -76,7 +84,7 @@ void REST_API::begin() {
         this->setTimeOut(request);
     });
 
-    server.on("/api", HTTP_POST,
+    server.on("/setParams", HTTP_POST,
     [](AsyncWebServerRequest *request) {
         // rien à faire ici (handler principal)
     },
@@ -86,7 +94,7 @@ void REST_API::begin() {
            size_t len,
            size_t index,
            size_t total) {
-        this->myFunction(request, data, len, index, total);
+        this->handleParamsRequest(request, data, len, index, total);
     });
 
     server.onNotFound([this](AsyncWebServerRequest* request) {
@@ -108,15 +116,13 @@ void REST_API::notFound(AsyncWebServerRequest *request) {
 // GET: status/
 void REST_API::getStatus(AsyncWebServerRequest *request) {
     uint8_t brightness = this->ledService.getBrightness();
-    uint8_t brightness = this->ledService.getBrightness();
-    //std::string output = status ? "true" : "false";
+    String status = brightness ? "true" : "false";
     String output = "Status: " + String(status) + "\n";
     request->send(200, "text.plain", output);
 }
 
 // POST: status/ // Status des lumières. ON/OFF
 void REST_API::setStatus(AsyncWebServerRequest *request) {
-    ledService.setColor(255, 255, 255);
 }
 
 // GET: Colors/ // Tout si 0 // Retourne JSON
@@ -125,7 +131,17 @@ void REST_API::getColors(AsyncWebServerRequest *request) {
 }
 
 // POST: Colors/ // Tout si 0 // Reçoit et retourne JSON
-void REST_API::setColors(AsyncWebServerRequest *request) {}
+void REST_API::setColors(AsyncWebServerRequest *request) {
+}
+
+
+void REST_API::getBrightness(AsyncWebServerRequest *request) {
+}
+
+
+void REST_API::setBrightness(AsyncWebServerRequest *request) {
+}
+
 
 // GET: Time/
 void REST_API::getTime(AsyncWebServerRequest *request) {}
@@ -139,18 +155,56 @@ void REST_API::getTimeOut(AsyncWebServerRequest *request) {}
 // POST: TimeOut/ // Format JSON: Status:"enable"/"disable", Duration:Integer
 void REST_API::setTimeOut(AsyncWebServerRequest *request) {}
 
-// Essai
-void REST_API::myFunction(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+
+void REST_API::handleParamsRequest(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
     StaticJsonDocument<512> doc;
     DeserializationError error = deserializeJson(doc, data);
 
     if (error) {
-        request->send(400, "application/json", "{\"error\":\"JSON invalide\"}");
+        request->send(400, "application/json", "{\"error\": " + String(error.c_str()) + "}");
         return;
     }
+#ifdef DEBUG
+    printJson(doc);
+#endif
+    if (doc.containsKey("rows") && doc["rows"].is<JsonArray>()) {
 
-    //int value = doc["value"];
-    // traitement...
+        JsonArray rows = doc["rows"];
+
+        for (JsonObject row : rows) {
+
+            uint8_t id = row["id"] | -1;
+            uint8_t brightness = row["br"] | row["brightness"] | 255;
+
+            JsonArray rgb = row["rgb"];
+            uint8_t r = rgb[0] | 0;
+            uint8_t g = rgb[1] | 0;
+            uint8_t b = rgb[2] | 0;
+
+            if (id > 0) {
+                this->ledService.setColor(id, r, g, b);
+                this->ledService.setBrightness(brightness);
+            }
+        }
+    }
+    else if (doc.containsKey("global") && doc["global"].is<JsonObject>()) {
+
+        JsonObject global = doc["global"];
+
+        uint8_t brightness = global["br"] | global["brightness"] | 255;
+
+        JsonObject color = global["color"];
+        uint8_t r = color["red"] | 0;
+        uint8_t g = color["green"] | 0;
+        uint8_t b = color["blue"] | 0;
+
+        this->ledService.setBrightness(brightness);
+        this->ledService.setColor(r, g, b);
+    }
+    else {
+        request->send(400, "text/plain", "error in json data. No valid data found.");
+        return;
+    }
 
     request->send(200, "application/json", "{\"status\":\"ok\"}");
 };
