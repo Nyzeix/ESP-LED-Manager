@@ -11,7 +11,7 @@ const char* ssid = "ssid";
 const char* pswd = "pswd";
 
 //Wi-Fi
-IPAddress ip(192, 168, 1, 253);
+IPAddress ip(192, 168, 1, 252);
 IPAddress gateway(192, 168, 1, 1);
 IPAddress subnet(255, 255, 0, 0);
 
@@ -27,4 +27,5 @@ void WifiService::connect() {
     }
     Serial.println("Connected");
     Serial.println(WiFi.localIP());
+
 }
