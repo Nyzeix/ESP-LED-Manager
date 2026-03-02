@@ -7,9 +7,12 @@ public:
     void setColor(uint8_t r, uint8_t g, uint8_t b);
     bool setColor(uint8_t row, uint8_t r, uint8_t g, uint8_t b);
     void getColor(uint8_t &r, uint8_t &g, uint8_t &b);
-    void getColor(uint16_t pin, uint8_t &r, uint8_t &g, uint8_t &b);
+    void getColor(uint16_t pixel, uint8_t &r, uint8_t &g, uint8_t &b);
+    bool getRowColor(uint8_t row, uint8_t &r, uint8_t &g, uint8_t &b);
     void setBrightness(uint8_t brightness);
     uint8_t getBrightness();
+    uint8_t getRows();
+    uint16_t getPixels();
 
     void show();
     void clear();

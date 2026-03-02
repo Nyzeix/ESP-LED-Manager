@@ -38,10 +38,11 @@ void LedStrip::setColor(uint8_t r, uint8_t g, uint8_t b) {
 }
 
 
-void LedStrip::getColor(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b) {
+void LedStrip::getColor(uint16_t pixel, uint8_t &r, uint8_t &g, uint8_t &b) {
     uint32_t color = strip.getPixelColor(pixel);
-    // TODO: Convert color back to 3 value as Red/Green/Blue
-
+    r = (color >> 16) & 0xFF;
+    g = (color >> 8) & 0xFF;
+    b = color & 0xFF;
 }
 
 
@@ -54,8 +55,9 @@ void LedStrip::setRowColor(uint8_t row, uint8_t r, uint8_t g, uint8_t b) {
 }
 
 
-void LedStrip::getRowColor(uint8_t row, uint8_t r, uint8_t g, uint8_t b) {
-    //TODO
+void LedStrip::getRowColor(uint8_t row, uint8_t &r, uint8_t &g, uint8_t &b) {
+    uint16_t firstPixel = (row - 1) * pixelsPerRow;
+    getColor(firstPixel, r, g, b);
 }
 
 

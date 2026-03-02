@@ -20,10 +20,22 @@ bool LedService::setColor(uint8_t row, uint8_t r, uint8_t g, uint8_t b) {
 }
 
 
-void LedService::getColor(uint16_t pin, uint8_t &r, uint8_t &g, uint8_t &b) {
-    uint32_t color = strip.getPixelColor(pin);
-    // What is the format of "color" ?
-    // Probably: RGBb. Should be splitted.
+void LedService::getColor(uint8_t &r, uint8_t &g, uint8_t &b) {
+    strip.getColor(0, r, g, b);
+}
+
+
+void LedService::getColor(uint16_t pixel, uint8_t &r, uint8_t &g, uint8_t &b) {
+    strip.getColor(pixel, r, g, b);
+}
+
+
+bool LedService::getRowColor(uint8_t row, uint8_t &r, uint8_t &g, uint8_t &b) {
+    if (row == 0 || row > strip.getRows()) {
+        return false;
+    }
+    strip.getRowColor(row, r, g, b);
+    return true;
 }
 
 
@@ -35,6 +47,16 @@ void LedService::setBrightness(uint8_t brightness) {
 
 uint8_t LedService::getBrightness() {
     return strip.getBrightness();
+}
+
+
+uint8_t LedService::getRows() {
+    return strip.getRows();
+}
+
+
+uint16_t LedService::getPixels() {
+    return strip.getPixels();
 }
 
 

@@ -25,10 +25,10 @@ public:
 
     bool begin();
     void setColor(uint8_t r, uint8_t g, uint8_t b);
-    void getColor(uint16_t pixel, uint8_t r, uint8_t g, uint8_t b);
+    void getColor(uint16_t pixel, uint8_t &r, uint8_t &g, uint8_t &b);
     //void setColor(uint16_t index, uint8_t r, uint8_t g, uint8_t b);
     void setRowColor(uint8_t row, uint8_t r, uint8_t g, uint8_t b);
-    void getRowColor(uint8_t row, uint8_t r, uint8_t g, uint8_t b);
+    void getRowColor(uint8_t row, uint8_t &r, uint8_t &g, uint8_t &b);
     uint32_t getPixelColor(uint16_t pixel);
     void setBrightness(uint8_t brightness);
     uint8_t getBrightness();
