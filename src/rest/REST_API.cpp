@@ -60,6 +60,14 @@ void REST_API::begin() {
         this->setColors(request);
     });
 
+    server.on("/Colors/Row/{id}", HTTP_GET, [this](AsyncWebServerRequest* request) {
+        this->getRowColor(request);
+    });
+
+    server.on("/Colors/Pixel/{id}", HTTP_GET, [this](AsyncWebServerRequest* request) {
+        this->getPixelColor(request);
+    });
+
     server.on("/Brightness", HTTP_GET, [this](AsyncWebServerRequest* request) {
         this->getBrightness(request);
     });
@@ -127,11 +135,89 @@ void REST_API::setStatus(AsyncWebServerRequest *request) {
 
 // GET: Colors/ // Tout si 0 // Retourne JSON
 void REST_API::getColors(AsyncWebServerRequest *request) {
+    uint8_t rows = this->ledService.getRows();
+    uint8_t brightness = this->ledService.getBrightness();
 
+    StaticJsonDocument<1024> doc;
+    JsonObject color = doc.createNestedObject("Color");
+
+    for (uint8_t i = 1; i <= rows; i++) {
+        uint8_t r = 0, g = 0, b = 0;
+        this->ledService.getRowColor(i, r, g, b);
+
+        String key = "Row" + String(i);
+        JsonObject rowObj = color.createNestedObject(key);
+        rowObj["red"] = r;
+        rowObj["green"] = g;
+        rowObj["blue"] = b;
+        rowObj["brightness"] = brightness;
+    }
+
+    String output;
+    serializeJson(doc, output);
+    request->send(200, "application/json", output);
 }
 
 // POST: Colors/ // Tout si 0 // Reçoit et retourne JSON
 void REST_API::setColors(AsyncWebServerRequest *request) {
+}
+
+
+// GET: Colors/Row/{id} // Retourne JSON avec la couleur du ruban sélectionné
+void REST_API::getRowColor(AsyncWebServerRequest *request) {
+    String idStr = request->pathArg(0);
+    int id = idStr.toInt();
+
+    if (id <= 0) {
+        request->send(400, "application/json", "{\"error\":\"Invalid row id\"}");
+        return;
+    }
+
+    uint8_t r = 0, g = 0, b = 0;
+    if (!this->ledService.getRowColor((uint8_t)id, r, g, b)) {
+        request->send(404, "application/json", "{\"error\":\"Row not found\"}");
+        return;
+    }
+
+    uint8_t brightness = this->ledService.getBrightness();
+
+    StaticJsonDocument<128> doc;
+    JsonObject row = doc.createNestedObject("Row");
+    row["red"] = r;
+    row["green"] = g;
+    row["blue"] = b;
+    row["brightness"] = brightness;
+
+    String output;
+    serializeJson(doc, output);
+    request->send(200, "application/json", output);
+}
+
+
+// GET: Colors/Pixel/{id} // Retourne JSON avec la couleur du pixel sélectionné
+void REST_API::getPixelColor(AsyncWebServerRequest *request) {
+    String idStr = request->pathArg(0);
+    int id = idStr.toInt();
+
+    if (id < 0 || (uint16_t)id >= this->ledService.getPixels()) {
+        request->send(400, "application/json", "{\"error\":\"Invalid pixel id\"}");
+        return;
+    }
+
+    uint8_t r = 0, g = 0, b = 0;
+    this->ledService.getColor((uint16_t)id, r, g, b);
+    uint8_t brightness = this->ledService.getBrightness();
+
+    StaticJsonDocument<128> doc;
+    JsonObject pixel = doc.createNestedObject("pixel");
+    pixel["red"] = r;
+    pixel["green"] = g;
+    pixel["blue"] = b;
+    pixel["brightness"] = brightness;
+
+    String output;
+    serializeJson(doc, output);
+    request->send(200, "application/json", output);
 }
 
 

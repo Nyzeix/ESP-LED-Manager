@@ -19,6 +19,10 @@ public:
     void getColors(AsyncWebServerRequest *);
     // POST: Colors/ // Tout si 0 // Reçoit et retourne JSON
     void setColors(AsyncWebServerRequest *);
+    // GET: Colors/Row/{id}
+    void getRowColor(AsyncWebServerRequest *);
+    // GET: Colors/Pixel/{id}
+    void getPixelColor(AsyncWebServerRequest *);
     // GET: Brightness
     void getBrightness(AsyncWebServerRequest *);
     // POST: Brightness
